@@ -11,9 +11,9 @@ fastapi = {extras = ["standard"], version = "^0.136.1"}
 psycopg = {extras = ["binary"], version = "^3.3.4"}
 sqlalchemy = "^2.0.49"
 aiosqlite = "^0.22.1"
-openai = "^2.37.0"
 python-dotenv = "^1.2.2"
 pydantic = {extras = ["email"], version = "^2.13.4"}
+google-generativeai = "^0.8.6"
 
 
 [build-system]

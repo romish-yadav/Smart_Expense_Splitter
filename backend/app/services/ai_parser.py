@@ -1,7 +1,7 @@
 """
 AI-powered expense parsing services.
 
-Uses OpenAI's API for:
+Uses Google Gemini API for:
 1. Natural language expense entry parsing
 2. Bill text parsing into line items
 """
@@ -9,7 +9,7 @@ Uses OpenAI's API for:
 import json
 import os
 import logging
-from openai import OpenAI
+import google.generativeai as genai
 
 logger = logging.getLogger(__name__)
 
@@ -59,11 +59,12 @@ Respond ONLY with valid JSON, no markdown formatting:
 {{"line_items": [{{"description": "...", "amount_paise": ...}}, ...], "total_paise": ..., "confidence": ...}}"""
 
 
-def get_openai_client() -> OpenAI | None:
-    api_key = os.getenv("OPENAI_API_KEY")
+def get_gemini_model():
+    api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         return None
-    return OpenAI(api_key=api_key)
+    genai.configure(api_key=api_key)
+    return genai.GenerativeModel("gemini-1.5-flash")
 
 
 def parse_nl_expense(
@@ -74,8 +75,8 @@ def parse_nl_expense(
     Parse natural language expense description into structured data.
     Returns parsed expense dict or None if parsing fails.
     """
-    client = get_openai_client()
-    if not client:
+    model = get_gemini_model()
+    if not model:
         return None
 
     members_str = "\n".join(
@@ -84,23 +85,22 @@ def parse_nl_expense(
     prompt = NL_EXPENSE_PROMPT.format(members=members_str)
 
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": prompt},
-                {"role": "user", "content": text},
-            ],
-            temperature=0.1,
-            max_tokens=1000,
+        response = model.generate_content(
+            f"{prompt}\n\nUser input: {text}",
+            generation_config=genai.types.GenerationConfig(
+                temperature=0.1,
+                max_output_tokens=1000,
+            ),
         )
 
-        content = response.choices[0].message.content
+        content = response.text
         if not content:
             return None
 
         content = content.strip()
         if content.startswith("```"):
-            content = content.split("\n", 1)[1]
+            lines = content.split("\n")
+            content = "\n".join(lines[1:])
             if content.endswith("```"):
                 content = content[:-3]
             content = content.strip()
@@ -128,7 +128,7 @@ def parse_nl_expense(
         logger.error("Failed to parse NL expense: %s", e)
         return None
     except Exception as e:
-        logger.error("OpenAI API error: %s", e)
+        logger.error("Gemini API error: %s", e)
         return None
 
 
@@ -139,28 +139,27 @@ def parse_bill_text(
     Parse raw bill/receipt text into line items.
     Returns parsed bill dict or None if parsing fails.
     """
-    client = get_openai_client()
-    if not client:
+    model = get_gemini_model()
+    if not model:
         return None
 
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": BILL_PARSE_PROMPT},
-                {"role": "user", "content": bill_text},
-            ],
-            temperature=0.1,
-            max_tokens=2000,
+        response = model.generate_content(
+            f"{BILL_PARSE_PROMPT}\n\nBill text:\n{bill_text}",
+            generation_config=genai.types.GenerationConfig(
+                temperature=0.1,
+                max_output_tokens=2000,
+            ),
         )
 
-        content = response.choices[0].message.content
+        content = response.text
         if not content:
             return None
 
         content = content.strip()
         if content.startswith("```"):
-            content = content.split("\n", 1)[1]
+            lines = content.split("\n")
+            content = "\n".join(lines[1:])
             if content.endswith("```"):
                 content = content[:-3]
             content = content.strip()
@@ -171,5 +170,5 @@ def parse_bill_text(
         logger.error("Failed to parse bill: %s", e)
         return None
     except Exception as e:
-        logger.error("OpenAI API error: %s", e)
+        logger.error("Gemini API error: %s", e)
         return None
