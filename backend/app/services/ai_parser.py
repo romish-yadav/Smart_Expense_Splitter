@@ -64,7 +64,7 @@ def get_gemini_model():
     if not api_key:
         return None
     genai.configure(api_key=api_key)
-    return genai.GenerativeModel("gemini-1.5-flash")
+    return genai.GenerativeModel("gemini-2.5-flash")
 
 
 def parse_nl_expense(
@@ -89,7 +89,8 @@ def parse_nl_expense(
             f"{prompt}\n\nUser input: {text}",
             generation_config=genai.types.GenerationConfig(
                 temperature=0.1,
-                max_output_tokens=1000,
+                max_output_tokens=8192,
+                response_mime_type="application/json",
             ),
         )
 
@@ -148,7 +149,8 @@ def parse_bill_text(
             f"{BILL_PARSE_PROMPT}\n\nBill text:\n{bill_text}",
             generation_config=genai.types.GenerationConfig(
                 temperature=0.1,
-                max_output_tokens=2000,
+                max_output_tokens=8192,
+                response_mime_type="application/json",
             ),
         )
 
