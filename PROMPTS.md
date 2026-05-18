@@ -61,7 +61,7 @@ IMPORTANT:
 ## Coding Tool Prompts (Used During Development)
 
 ### Prompt 1: Project Architecture Planning
-**Asked**: "I need to build a Splitwise-style expense splitter with FastAPI backend, React frontend, SQLite, and OpenAI for NL parsing. Help me plan the database schema with proper relationships for users, groups, expenses, and expense shares. Money must be integers (paise)."
+**Asked**: "I need to build a Splitwise-style expense splitter with FastAPI backend, React frontend, SQLite, and Google Gemini for NL parsing. Help me plan the database schema with proper relationships for users, groups, expenses, and expense shares. Money must be integers (paise)."
 **Got**: Schema design with the 5-table structure used in the final app.
 
 ### Prompt 2: Settle-Up Algorithm
@@ -73,5 +73,5 @@ IMPORTANT:
 **Got**: Component structure and page layouts. Modified extensively for proper error/loading/empty states and mobile UX polish.
 
 ### Prompt 4: AI Integration Error Handling
-**Asked**: "How should I handle failures in the OpenAI API call for expense parsing? I need graceful degradation — never save hallucinated data, always show manual entry fallback."
+**Asked**: "How should I handle failures in the Gemini API call for expense parsing? I need graceful degradation — never save hallucinated data, always show manual entry fallback."
 **Got**: The confidence-based approach with tiered UI feedback (green/yellow/red badges) and explicit confirmation flow before saving.

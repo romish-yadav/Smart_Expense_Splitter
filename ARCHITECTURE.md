@@ -4,7 +4,7 @@
 
 ### Backend: Python + FastAPI
 **Why Python over Node.js for this problem:**
-- **AI integration**: Python has first-class support for OpenAI SDK, making LLM integration seamless. The structured output parsing, JSON validation, and error handling patterns are more natural in Python.
+- **AI integration**: Python has first-class support for the Google Generative AI SDK, making LLM integration seamless. The structured output parsing, JSON validation, and error handling patterns are more natural in Python.
 - **FastAPI advantages**: Auto-generated OpenAPI docs, Pydantic validation (server-side validation for free), async support, and type hints throughout.
 - **Rapid prototyping**: For a 5-hour build, Python + FastAPI is faster to stand up a validated REST API than Express (which needs manual validation middleware).
 
@@ -21,9 +21,9 @@
 - **SQLAlchemy**: Mature ORM with proper relationship management, easy migration to PostgreSQL/MySQL in production.
 - **Production path**: Swap `DATABASE_URL` to PostgreSQL connection string — no code changes needed.
 
-### AI: OpenAI GPT-4o-mini
-- **Why GPT-4o-mini**: Fast, cheap, good at structured output extraction. For parsing natural language into JSON schemas, it's reliable.
-- **Structured output approach**: System prompts define exact JSON schemas. Response is validated before use.
+### AI: Google Gemini 2.5 Flash
+- **Why Gemini 2.5 Flash**: Fast, free tier available, excellent at structured output extraction. For parsing natural language into JSON schemas, it's reliable.
+- **Structured output approach**: Prompts define exact JSON schemas. Uses `response_mime_type="application/json"` for guaranteed valid JSON output. `max_output_tokens=8192` prevents truncation.
 - **Graceful degradation**: If API is down or confidence is low, users fall back to manual entry with clear messaging.
 
 ---
@@ -149,7 +149,7 @@ src/
 ## AI Feature: Failure Handling
 
 ### Natural Language Expense Parsing
-1. User types free-text → sent to OpenAI with group member context
+1. User types free-text → sent to Gemini with group member context
 2. Response parsed as JSON with defined schema
 3. **Confidence scoring**: AI returns 0.0–1.0 confidence
    - `>= 0.8`: Show parsed result with green badge
@@ -160,7 +160,7 @@ src/
 5. **No silent saves**: Parsed result is always shown for review. User must click "Confirm & Edit" which redirects to the manual form pre-filled with parsed values.
 
 ### Bill Text Parsing
-1. User pastes raw bill text → sent to OpenAI
+1. User pastes raw bill text → sent to Gemini
 2. Returns line items with amounts
 3. User assigns each item to group members via toggle buttons
 4. Custom split amounts computed from assignments
