@@ -2,7 +2,8 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./expense_splitter.db")
+_default_db = "sqlite:////data/app.db" if os.path.isdir("/data") else "sqlite:///./expense_splitter.db"
+DATABASE_URL = os.getenv("DATABASE_URL", _default_db)
 
 engine = create_engine(
     DATABASE_URL,
